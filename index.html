@@ -2,30 +2,16 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-<<<<<<< HEAD
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Konfigurator Krzesła</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-=======
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Konfigurator Krzesła</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #0c0c0c;
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
       display: flex;
       height: 100vh;
       overflow: hidden;
     }
-<<<<<<< HEAD
 
     #viewer {
       flex: 2;
@@ -36,20 +22,12 @@
     }
 
     #viewer iframe {
-=======
-    #viewer {
-      flex: 1;
-      height: 100%;
-    }
-    iframe {
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
       width: 100%;
       height: 100%;
       border: none;
     }
 
     #ui-panel {
-<<<<<<< HEAD
       flex: 1;
       background-color: #fff;
       display: flex;
@@ -86,81 +64,16 @@
     .icon-button.selected {
       outline: 2px solid black;
       border-radius: 5px;
-=======
-      width: 320px;
-      background-color: #111;
-      color: rgb(255, 255, 255);
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .option-button, .checkout-button, .confirm-button, .cancel-button, .confirm-selection-button {
-      padding: 12px 24px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .option-button {
-      background: linear-gradient(90deg, #887f00, #000000);
-      color: rgb(180, 180, 180);
-    }
-
-    .option-button:hover {
-      background: linear-gradient(90deg, #000000, #000000);
-    }
-
-    .checkout-button {
-      background-color: #1c1c1c;
-      border: 1px solid #ffee00;
-      color: #dfdfdf;
-    }
-
-    .checkout-button:hover {
-      background-color: #eeff00;
-      color: white;
-    }
-
-    .confirm-button {
-      background-color: #eeff00;
-      color: white;
-    }
-
-    .cancel-button {
-      background-color: #000000;
-      color: white;
-    }
-
-    .confirm-selection-button {
-      background-color: #444;
-      color: white;
-      margin-top: 10px;
-    }
-
-    .confirm-selection-button:hover {
-      background-color: #666;
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
     }
 
     .panel {
       display: none;
-<<<<<<< HEAD
-=======
-      margin-top: 20px;
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
     }
 
     .panel.active {
       display: block;
     }
 
-<<<<<<< HEAD
     .chair-grid {
       display: flex;
       flex-wrap: wrap;
@@ -221,15 +134,10 @@
 
     .cart-button:hover {
       background-color: #333;
-=======
-    p {
-      margin-bottom: 10px;
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
     }
   </style>
 </head>
 <body>
-<<<<<<< HEAD
   <div id="viewer">
     <iframe src="https://v3d.net/19pa" allowfullscreen id="model-iframe"></iframe>
   </div>
@@ -273,66 +181,10 @@
     <div class="summary">
       <div id="summary">Suma: 0 zł</div>
       <button class="cart-button">Dodaj do koszyka</button>
-=======
-
-  <!-- Viewer (Verge3D iframe) -->
-  <div id="viewer">
-    <iframe src="https://v3d.net/19pa" allowfullscreen></iframe>
-  </div>
-
-  <!-- UI Panel -->
-  <div id="ui-panel">
-    <button class="option-button" onclick="showPanel('simple')">Simple Chair</button>
-    <button class="option-button" onclick="showPanel('configurable')">Configurable Chair</button>
-    <button class="option-button" onclick="showPanel('material')">Material</button>
-
-    <!-- Panel: Simple Chair -->
-    <div id="panel-simple" class="panel">
-      <p>Wybierz wariant krzesła:</p>
-      <button>Model A</button>
-      <button>Model B</button>
-      <button class="confirm-selection-button" onclick="confirmChoice()">Zatwierdź wybór</button>
-    </div>
-
-    <!-- Panel: Configurable Chair -->
-    <div id="panel-configurable" class="panel">
-      <p>Wybierz siedzisko i oparcie:</p>
-      <button>Siedzisko A</button>
-      <button>Siedzisko B</button>
-      <p>Wybierz nogi:</p>
-      <button>Nogi metalowe</button>
-      <button>Nogi drewniane</button>
-      <button class="confirm-selection-button" onclick="confirmChoice()">Zatwierdź wybór</button>
-    </div>
-
-    <!-- Panel: Material -->
-    <div id="panel-material" class="panel">
-      <p>Na co chcesz nałożyć materiał?</p>
-      <button>Siedzisko</button>
-      <button>Oparcie wewnętrzne</button>
-      <button>Oparcie zewnętrzne</button>
-      <p>Wybierz tkaninę:</p>
-      <button>Materiał 1</button>
-      <button>Materiał 2</button>
-      <button class="confirm-selection-button" onclick="confirmChoice()">Zatwierdź wybór</button>
-    </div>
-
-    <!-- Checkout -->
-    <div id="checkout-section" style="margin-top: 20px; display: none;">
-      <button class="checkout-button" onclick="showConfirmation()">Do kasy</button>
-    </div>
-
-    <!-- Confirmation -->
-    <div id="confirmation" style="display: none; margin-top: 20px;">
-      <p>Czy jesteś pewny swojego wyboru?</p>
-      <button class="confirm-button" onclick="confirmSelection()">Tak</button>
-      <button class="cancel-button" onclick="cancelConfirmation()">Nie</button>
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
     </div>
   </div>
 
   <script>
-<<<<<<< HEAD
     const selected = {
       chair: null,
       kubelek: null,
@@ -424,36 +276,5 @@
 
     loadSheetData();
   </script>
-=======
-    function showPanel(panelId) {
-      const panels = document.querySelectorAll('.panel');
-      panels.forEach(p => p.classList.remove('active'));
-      document.getElementById('panel-' + panelId).classList.add('active');
-
-      // Ukryj inne sekcje
-      document.getElementById('checkout-section').style.display = 'none';
-      document.getElementById('confirmation').style.display = 'none';
-    }
-
-    function confirmChoice() {
-      // Po zatwierdzeniu pokazujemy "Do kasy"
-      document.getElementById('checkout-section').style.display = 'block';
-      document.getElementById('confirmation').style.display = 'none';
-    }
-
-    function showConfirmation() {
-      document.getElementById('confirmation').style.display = 'block';
-    }
-
-    function confirmSelection() {
-      alert("Dziękujemy za skonfigurowanie produktu i zakup!");
-    }
-
-    function cancelConfirmation() {
-      document.getElementById('confirmation').style.display = 'none';
-    }
-  </script>
-
->>>>>>> e77a2b779279fa9ea6505de638361248780b913c
 </body>
 </html>
