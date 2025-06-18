@@ -12,7 +12,7 @@ git remote remove origin
 git remote add origin https://github.com/studiog14/FK_Configurator.git
 
 echo Pobieranie zmian z GitHub...
-git pull origin main --allow-unrelated-histories
+git push origin master --allow-unrelated-histories
 
 echo Wypychanie zmian do GitHub...
 git push -u origin main
