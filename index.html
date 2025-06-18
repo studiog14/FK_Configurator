@@ -42,7 +42,7 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 15px;
-    }convertDriveLinks
+    }
 
     .icon-button {
       background-color: transparent;
@@ -135,6 +135,36 @@
     .cart-button:hover {
       background-color: #333;
     }
+
+    /* Nowe style – selektor części */
+    #material-part-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .part-button {
+      width: 80px;
+      background-color: #f0f0f0;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      padding: 5px;
+      transition: 0.3s;
+    }
+
+    .part-button img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 5px;
+    }
+
+    .part-button.active {
+      border-color: black;
+      background-color: #e0e0e0;
+    }
   </style>
 </head>
 <body>
@@ -174,6 +204,22 @@
     </div>
 
     <div id="panel-material" class="panel">
+      <p>Wybierz część krzesła:</p>
+      <div id="material-part-selector">
+        <div class="part-button active" data-part="legs" onclick="selectPart(this)">
+          <img src="icons/legs.png" alt="Nogi"><br>Nogi
+        </div>
+        <div class="part-button" data-part="seat" onclick="selectPart(this)">
+          <img src="icons/seat.png" alt="Siedzisko"><br>Siedzisko
+        </div>
+        <div class="part-button" data-part="back_outer" onclick="selectPart(this)">
+          <img src="icons/back_outer.png" alt="Oparcie zewn."><br>Zewn. oparcie
+        </div>
+        <div class="part-button" data-part="back_inner" onclick="selectPart(this)">
+          <img src="icons/back_inner.png" alt="Oparcie wewn."><br>Wewn. oparcie
+        </div>
+      </div>
+
       <p>Wybierz materiał:</p>
       <div id="material-grid" class="chair-grid"></div>
     </div>
@@ -185,6 +231,8 @@
   </div>
 
   <script>
+    let selectedPart = "legs"; // domyślnie wybrane
+
     const selected = {
       chair: null,
       kubelek: null,
@@ -211,6 +259,12 @@
       btn.classList.add('selected');
     }
 
+    function selectPart(el) {
+      document.querySelectorAll('.part-button').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      selectedPart = el.getAttribute('data-part');
+    }
+
     function selectOption(type, name, price, el) {
       const grid = document.getElementById(`${type}-grid`);
       const previouslySelected = grid.querySelector('.selected-chair');
@@ -227,6 +281,9 @@
       }
 
       updateSummary();
+
+      // 👉 Możesz tutaj wysłać info do Verge3D (Puzzles): np. applyMaterialToPart(selectedPart, name)
+      // console.log(`Zastosuj materiał '${name}' do części '${selectedPart}'`);
     }
 
     async function loadSheetData() {
