@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title></title>
   <style>
+    /* (styl taki jak wcześniej, bez zmian) */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -136,7 +137,6 @@
       background-color: #333;
     }
 
-    /* Nowe style – selektor części */
     #material-part-selector {
       display: flex;
       gap: 10px;
@@ -174,16 +174,16 @@
 
   <div id="ui-panel">
     <div id="top-buttons">
-      <button class="icon-button selected" data-tooltip="Wybór Krzesła" onclick="showPanel('panel-chair', this)">
+      <button class="icon-button selected" onclick="showPanel('panel-chair', this)">
         <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
       </button>
-      <button class="icon-button" data-tooltip="Wybór Kubełka" onclick="showPanel('panel-kubelek', this)">
+      <button class="icon-button" onclick="showPanel('panel-kubelek', this)">
         <img src="icons/seat_icon.png" alt="Wybierz kubełek" />
       </button>
-      <button class="icon-button" data-tooltip="Wybór Nóg" onclick="showPanel('panel-nogi', this)">
+      <button class="icon-button" onclick="showPanel('panel-nogi', this)">
         <img src="icons/legs_icon.png" alt="Wybierz nogi" />
       </button>
-      <button class="icon-button" data-tooltip="Wybór Materiału" onclick="showPanel('panel-material', this)">
+      <button class="icon-button" onclick="showPanel('panel-material', this)">
         <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
       </button>
     </div>
@@ -216,7 +216,7 @@
           <img src="icons/m_backseat_out_icon.png" alt="Oparcie zewn."><br>Oparcie zewnętrzne
         </div>
         <div class="part-button" data-part="back_inner" onclick="selectPart(this)">
-          <img src="icons/m_backseat_in_icon.png" alt="Oparcie wewn."><br>Oparcie wewnętrzne
+          <img src="icons/m_backseat_in_icon.png" alt="Oparcie wewn."><br>Oparcie
         </div>
       </div>
 
@@ -231,7 +231,7 @@
   </div>
 
   <script>
-    let selectedPart = "legs"; // domyślnie wybrane
+    let selectedPart = "legs";
 
     const selected = {
       chair: null,
@@ -246,6 +246,8 @@
       nogi: 0,
       material: 0,
     };
+
+    let materialsData = [];
 
     function updateSummary() {
       const total = prices.chair + prices.kubelek + prices.nogi + prices.material;
@@ -263,6 +265,7 @@
       document.querySelectorAll('.part-button').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       selectedPart = el.getAttribute('data-part');
+      filterMaterialsByPart(selectedPart);
     }
 
     function selectOption(type, name, price, el) {
@@ -281,9 +284,6 @@
       }
 
       updateSummary();
-
-      // 👉 Możesz tutaj wysłać info do Verge3D (Puzzles): np. applyMaterialToPart(selectedPart, name)
-      // console.log(`Zastosuj materiał '${name}' do części '${selectedPart}'`);
     }
 
     async function loadSheetData() {
@@ -297,7 +297,6 @@
       const chairGrid = document.getElementById("chair-grid");
       const kubelekGrid = document.getElementById("kubelek-grid");
       const nogiGrid = document.getElementById("nogi-grid");
-      const materialGrid = document.getElementById("material-grid");
 
       data.forEach(row => {
         const tile = document.createElement("div");
@@ -324,9 +323,24 @@
             nogiGrid.appendChild(tile);
             break;
           case "Materiał":
-            tile.onclick = () => selectOption('material', row.Nazwa, price, tile);
-            materialGrid.appendChild(tile);
+            materialsData.push({ ...row, price, tile });
             break;
+        }
+      });
+
+      filterMaterialsByPart(selectedPart);
+    }
+
+    function filterMaterialsByPart(part) {
+      const materialGrid = document.getElementById("material-grid");
+      materialGrid.innerHTML = "";
+
+      const grupa = part === "legs" ? "metal/drewno" : "tkanina";
+
+      materialsData.forEach(row => {
+        if (row.Grupa.toLowerCase() === grupa.toLowerCase()) {
+          row.tile.onclick = () => selectOption('material', row.Nazwa, row.price, row.tile);
+          materialGrid.appendChild(row.tile);
         }
       });
     }
