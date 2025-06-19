@@ -1,22 +1,8 @@
 @echo off
-cd /d D:\FK_Configurator
-
-echo Dodawanie zmian do GIT...
+echo Zapisywanie zmian...
 git add .
-
-echo Tworzenie commita...
-git commit -m "Aktualizacja projektu"
-
-echo Upewnianie się, że masz ustawione poprawne repozytorium...
-git remote remove origin
-git remote add origin https://github.com/studiog14/FK_Configurator.git
-
-echo Pobieranie zmian z GitHub...
-git push origin master --allow-unrelated-histories
-
-echo Wypychanie zmian do GitHub...
-git push -u origin main
-
-echo ---
-echo Gotowe! Repozytorium zostało zaktualizowane.
+git commit -m "Aktualizacja konfiguratora"
+echo Pobieranie zmian z GitHuba i wypychanie...
+git pull --rebase
+git push
 pause
