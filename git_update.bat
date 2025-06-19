@@ -1,8 +1,7 @@
 @echo off
-echo Zapisywanie zmian...
+cd /d D:\FK_Configurator
 git add .
-git commit -m "Aktualizacja konfiguratora"
-echo Pobieranie zmian z GitHuba i wypychanie...
+git commit -m "Aktualizacja"
 git pull --rebase
 git push
 pause
