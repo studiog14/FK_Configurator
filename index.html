@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title></title>
   <style>
-    /* (styl taki jak wcześniej, bez zmian) */
+    /* bez zmian, ale dodajemy tooltip */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -51,6 +51,7 @@
       padding: 5px;
       cursor: pointer;
       transition: transform 0.2s;
+      position: relative;
     }
 
     .icon-button img {
@@ -60,6 +61,20 @@
 
     .icon-button:hover {
       transform: scale(1.1);
+    }
+
+    .icon-button:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
     }
 
     .icon-button.selected {
@@ -174,16 +189,10 @@
 
   <div id="ui-panel">
     <div id="top-buttons">
-      <button class="icon-button selected" onclick="showPanel('panel-chair', this)">
+      <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
         <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
       </button>
-      <button class="icon-button" onclick="showPanel('panel-kubelek', this)">
-        <img src="icons/seat_icon.png" alt="Wybierz kubełek" />
-      </button>
-      <button class="icon-button" onclick="showPanel('panel-nogi', this)">
-        <img src="icons/legs_icon.png" alt="Wybierz nogi" />
-      </button>
-      <button class="icon-button" onclick="showPanel('panel-material', this)">
+      <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
         <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
       </button>
     </div>
@@ -191,16 +200,6 @@
     <div id="panel-chair" class="panel active">
       <p>Wybierz model krzesła:</p>
       <div id="chair-grid" class="chair-grid"></div>
-    </div>
-
-    <div id="panel-kubelek" class="panel">
-      <p>Wybierz kubełek:</p>
-      <div id="kubelek-grid" class="chair-grid"></div>
-    </div>
-
-    <div id="panel-nogi" class="panel">
-      <p>Wybierz nogi:</p>
-      <div id="nogi-grid" class="chair-grid"></div>
     </div>
 
     <div id="panel-material" class="panel">
@@ -219,7 +218,6 @@
           <img src="icons/m_backseat_in_icon.png" alt="Oparcie wewn."><br>Oparcie
         </div>
       </div>
-
       <p>Wybierz materiał:</p>
       <div id="material-grid" class="chair-grid"></div>
     </div>
@@ -232,25 +230,12 @@
 
   <script>
     let selectedPart = "legs";
-
-    const selected = {
-      chair: null,
-      kubelek: null,
-      nogi: null,
-      material: null,
-    };
-
-    const prices = {
-      chair: 0,
-      kubelek: 0,
-      nogi: 0,
-      material: 0,
-    };
-
+    const selected = { chair: null, material: null };
+    const prices = { chair: 0, material: 0 };
     let materialsData = [];
 
     function updateSummary() {
-      const total = prices.chair + prices.kubelek + prices.nogi + prices.material;
+      const total = prices.chair + prices.material;
       document.getElementById("summary").innerText = `Suma: ${total} zł`;
     }
 
@@ -269,7 +254,7 @@
     }
 
     function selectOption(type, name, price, el) {
-      const grid = document.getElementById(`${type}-grid`);
+      const grid = document.getElementById(`${type}-grid`) || document.getElementById("chair-grid");
       const previouslySelected = grid.querySelector('.selected-chair');
 
       if (previouslySelected === el) {
@@ -295,8 +280,6 @@
       const data = await response.json();
 
       const chairGrid = document.getElementById("chair-grid");
-      const kubelekGrid = document.getElementById("kubelek-grid");
-      const nogiGrid = document.getElementById("nogi-grid");
 
       data.forEach(row => {
         const tile = document.createElement("div");
@@ -306,25 +289,13 @@
           <div class="chair-name">${row.Nazwa}</div>
           <div class="chair-price">Cena: ${row.Cena} zł</div>
         `;
-
         const price = parseFloat(row.Cena);
 
-        switch (row.Typ) {
-          case "Krzesło":
-            tile.onclick = () => selectOption('chair', row.Nazwa, price, tile);
-            chairGrid.appendChild(tile);
-            break;
-          case "Kubełek":
-            tile.onclick = () => selectOption('kubelek', row.Nazwa, price, tile);
-            kubelekGrid.appendChild(tile);
-            break;
-          case "Nogi":
-            tile.onclick = () => selectOption('nogi', row.Nazwa, price, tile);
-            nogiGrid.appendChild(tile);
-            break;
-          case "Materiał":
-            materialsData.push({ ...row, price, tile });
-            break;
+        if (["Krzesło", "Kubełek", "Nogi"].includes(row.Typ)) {
+          tile.onclick = () => selectOption("chair", row.Nazwa, price, tile);
+          chairGrid.appendChild(tile);
+        } else if (row.Typ === "Materiał") {
+          materialsData.push({ ...row, price, tile });
         }
       });
 
