@@ -6,58 +6,63 @@
   <title></title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
 
-    #viewer {
-      flex: 10;
-      background-color: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+#viewer {
+  flex: 1; /* zajmuje całą pozostałą przestrzeń */
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px; /* opcjonalnie, aby nie znikł */
+  min-height: 200px;
+}
 
-    #viewer iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+#viewer iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
-    #ui-panel {
-      flex: 4;
-      background-color: #fff;
-      display: flex;
-      flex-direction: row;
-      border-left: 1px solid #ccc;
-      box-sizing: border-box;
-      overflow: hidden;
-      position: relative;
-    }
+#ui-panel {
+  width: 510px; /* stała szerokość panelu UI */
+  flex: none; /* nie skaluj się */
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  border-left: 1px solid #ccc;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  min-width: 510px; /* wymuszona minimalna szerokość */
+}
 
-    #ui-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
+/* poniżej pozostaw wszystko bez zmian */
+#ui-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
 
-    #right-icons {
-      width: 80px;
-      background-color: #fff;
-      border-left: 2px solid black;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 5px;
-      box-sizing: border-box;
-    }
+#right-icons {
+  width: 80px;
+  background-color: #fff;
+  border-left: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 5px;
+  box-sizing: border-box;
+}
     
      #legs-button {
     display: none;
@@ -198,6 +203,26 @@
       border-color: black;
       background-color: #e0e0e0;
     }
+
+    .chair-tile {
+    position: relative;
+  }
+
+  .part-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 28px;
+    height: 28px;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .part-icon img {
+    width: 100%;
+    height: 100%;
+  }
+  
   </style>
 </head>
 <body>
@@ -257,145 +282,214 @@
   </div>
 
   <script>
-    let selectedPart = "legs";
-    const selected = { chair: null, material: null };
-    const prices = { chair: 0, material: 0 };
-    let materialsData = [];
-    let legsData = [];   // <-- tutaj dokładnie
-    function updateSummary() {
-      const total = prices.chair + prices.material;
-      document.getElementById("summary").innerText = `Suma: ${total} zł`;
+  let selectedPart = "legs";
+  const selected = { chair: null, material: null, legsTile: null };
+  const prices = { chair: 0, legs: 0 };
+  const selectedMaterials = {};
+  let materialsData = [];
+  let legsData = [];
+  const iconNames = {
+  legs: "m_legs_icon.png",
+  seat: "m_seat_icon.png",
+  back_inner: "m_backseat_in_icon.png",
+  back_outer: "m_backseat_out_icon.png",
+  // itd.
+};
+
+  function updateSummary() {
+    let total = (prices.chair || 0) + (prices.legs || 0);
+
+    for (const part in selectedMaterials) {
+      total += selectedMaterials[part]?.price || 0;
     }
 
-    function showPanel(panelId, btn) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
+    document.getElementById("summary").innerText = `Suma: ${total} zł`;
+  }
 
-      document.querySelectorAll('.icon-button').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
+  function showPanel(panelId, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+
+    document.querySelectorAll('.icon-button').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function selectPart(el) {
+    document.querySelectorAll('.part-button').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedPart = el.getAttribute('data-part');
+    filterMaterialsByPart(selectedPart);
+  }
+
+  function selectOption(type, name, price, el) {
+    const grid = document.getElementById(`${type}-grid`) || document.getElementById("chair-grid");
+    const previouslySelected = grid.querySelector('.selected-chair');
+
+    if (previouslySelected === el) {
+      el.classList.remove('selected-chair');
+      selected[type] = null;
+      prices[type] = 0;
+    } else {
+      grid.querySelectorAll('.chair-tile').forEach(tile => tile.classList.remove('selected-chair'));
+      el.classList.add('selected-chair');
+      selected[type] = name;
+      prices[type] = price;
     }
 
-    function selectPart(el) {
-      document.querySelectorAll('.part-button').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
-      selectedPart = el.getAttribute('data-part');
-      filterMaterialsByPart(selectedPart);
-    }
+    updateSummary();
+  }
 
-    function selectOption(type, name, price, el) {
-      const grid = document.getElementById(`${type}-grid`) || document.getElementById("chair-grid");
-      const previouslySelected = grid.querySelector('.selected-chair');
+  async function loadSheetData() {
+    const sheetId = "1vCs6YeHgKqlYwg8rvJOqVzNRnXeATJCBuK-zh3NNj78";
+    const sheetName = "Dane";
+    const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
-      if (previouslySelected === el) {
-        el.classList.remove('selected-chair');
-        selected[type] = null;
-        prices[type] = 0;
-      } else {
-        grid.querySelectorAll('.chair-tile').forEach(tile => tile.classList.remove('selected-chair'));
-        el.classList.add('selected-chair');
-        selected[type] = name;
-        prices[type] = price;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const chairGrid = document.getElementById("chair-grid");
+
+    data.forEach(row => {
+      const price = parseFloat(row.Cena);
+
+      if (row.Typ === "Krzesło" || row.Typ === "Kubełek") {
+        const tile = document.createElement("div");
+        tile.className = "chair-tile";
+        tile.innerHTML = `
+          <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+          <div class="chair-name">${row.Nazwa}</div>
+          <div class="chair-price">Cena: ${row.Cena} zł</div>
+        `;
+        tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
+        tile.onclick = () => {
+          selectOption("chair", row.Nazwa, price, tile);
+
+          const grupa = row.Grupa.toLowerCase();
+          const legsButton = document.getElementById("legs-button");
+          if (grupa === "kubełek") {
+            legsButton.style.display = "inline-block";
+            showLegsOptions();
+          } else {
+            legsButton.style.display = "none";
+          }
+        };
+        chairGrid.appendChild(tile);
+
+      } else if (row.Typ === "Nogi") {
+        const tile = document.createElement("div");
+        tile.className = "chair-tile";
+        tile.innerHTML = `
+          <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+          <div class="chair-name">${row.Nazwa}</div>
+          <div class="chair-price">Cena: ${row.Cena} zł</div>
+        `;
+        tile.setAttribute("data-price", price);
+        legsData.push(tile);
+
+      } else if (row.Typ === "Materiał") {
+        const tile = document.createElement("div");
+        tile.className = "chair-tile";
+        tile.innerHTML = `
+          <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+          <div class="chair-name">${row.Nazwa}</div>
+          <div class="chair-price">Cena: ${row.Cena} zł</div>
+        `;
+        tile.onclick = () => {
+          const previouslySelected = selectedMaterials[selectedPart]?.tile;
+
+          if (previouslySelected === tile) {
+            tile.classList.remove("selected-chair");
+            const icon = tile.querySelector(".part-icon");
+            if (icon) icon.remove();
+            delete selectedMaterials[selectedPart];
+            updateSummary();
+            return;
+          }
+
+          if (previouslySelected) {
+            previouslySelected.classList.remove("selected-chair");
+            const oldIcon = previouslySelected.querySelector(".part-icon");
+            if (oldIcon) oldIcon.remove();
+          }
+
+          tile.classList.add("selected-chair");
+
+          const icon = document.createElement("div");
+          icon.className = "part-icon";
+          icon.innerHTML = `<img src="icons/${iconNames[selectedPart] || (selectedPart + '.png')}" alt="${selectedPart}" />`;
+
+
+          tile.appendChild(icon);
+
+          selectedMaterials[selectedPart] = {
+            name: row.Nazwa,
+            price: price,
+            tile: tile
+          };
+
+          updateSummary();
+        };
+
+        materialsData.push({ ...row, price, tile, Grupa: row.Grupa });
       }
+    });
 
-      updateSummary();
-    }
+    filterMaterialsByPart(selectedPart);
+  }
 
-    async function loadSheetData() {
-  const sheetId = "1vCs6YeHgKqlYwg8rvJOqVzNRnXeATJCBuK-zh3NNj78";
-  const sheetName = "Dane";
-  const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+  function showLegsOptions() {
+    const legsPanel = document.getElementById("panel-legs");
+    legsPanel.innerHTML = '<p>Wybierz wariant nóg:</p>';
 
-  const response = await fetch(url);
-  const data = await response.json();
+    const legsContainer = document.createElement("div");
+    legsContainer.className = "chair-grid";
 
-  const chairGrid = document.getElementById("chair-grid");
-
-  data.forEach(row => {
-    const price = parseFloat(row.Cena);
-
-    if (row.Typ === "Krzesło" || row.Typ === "Kubełek") {
-      const tile = document.createElement("div");
-      tile.className = "chair-tile";
-      tile.innerHTML = `
-        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
-        <div class="chair-name">${row.Nazwa}</div>
-        <div class="chair-price">Cena: ${row.Cena} zł</div>
-      `;
-      tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
+    legsData.forEach(tile => {
       tile.onclick = () => {
-        selectOption("chair", row.Nazwa, price, tile);
+        const previouslySelected = selected.legsTile;
 
-        const grupa = row.Grupa.toLowerCase();
-        const legsButton = document.getElementById("legs-button");
-        if (grupa === "kubełek") {
-          legsButton.style.display = "inline-block";
-          showLegsOptions();
-          showPanel('panel-legs', legsButton);
-        } else {
-          legsButton.style.display = "none";
+        if (previouslySelected === tile) {
+          tile.classList.remove("selected-chair");
+          selected.legsTile = null;
+          prices.legs = 0;
+          updateSummary();
+          return;
         }
+
+        if (previouslySelected) {
+          previouslySelected.classList.remove("selected-chair");
+        }
+
+        tile.classList.add("selected-chair");
+        selected.legsTile = tile;
+        prices.legs = parseFloat(tile.getAttribute("data-price")) || 0;
+
+        updateSummary();
       };
-      chairGrid.appendChild(tile);
 
-    } else if (row.Typ === "Nogi") {
-      const tile = document.createElement("div");
-      tile.className = "chair-tile";
-      tile.innerHTML = `
-        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
-        <div class="chair-name">${row.Nazwa}</div>
-        <div class="chair-price">Cena: ${row.Cena} zł</div>
-      `;
-      tile.onclick = () => selectOption('material', row.Nazwa, price, tile);
-      legsData.push(tile);
+      tile.classList.remove("selected-chair");
+      legsContainer.appendChild(tile);
+    });
 
-    } else if (row.Typ === "Materiał") {
-      const tile = document.createElement("div");
-      tile.className = "chair-tile";
-      tile.innerHTML = `
-        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
-        <div class="chair-name">${row.Nazwa}</div>
-        <div class="chair-price">Cena: ${row.Cena} zł</div>
-      `;
-      tile.onclick = () => selectOption('material', row.Nazwa, price, tile);
-      materialsData.push({ ...row, price, tile });
-    }
-  });
+    legsPanel.appendChild(legsContainer);
+  }
 
-  filterMaterialsByPart(selectedPart);
-}
+  function filterMaterialsByPart(part) {
+    const materialGrid = document.getElementById("material-grid");
+    materialGrid.innerHTML = "";
 
-    function showLegsOptions() {
-  const legsPanel = document.getElementById("panel-legs");
-  legsPanel.innerHTML = '<p>Wybierz wariant nóg:</p>'; // czyszczenie i nagłówek
+    const grupa = part === "legs" ? "metal/drewno" : "tkanina";
 
-  const legsContainer = document.createElement("div");
-  legsContainer.className = "chair-grid";
+    materialsData.forEach(row => {
+      if (row.Grupa.toLowerCase() === grupa.toLowerCase()) {
+        materialGrid.appendChild(row.tile);
+      }
+    });
+  }
 
-  legsData.forEach(tile => {
-    legsContainer.appendChild(tile);
-  });
+  loadSheetData();
+</script>
 
-  legsPanel.appendChild(legsContainer);
-}
 
-    function filterMaterialsByPart(part) {
-      const materialGrid = document.getElementById("material-grid");
-      materialGrid.innerHTML = "";
-
-      const grupa = part === "legs" ? "metal/drewno" : "tkanina";
-
-      materialsData.forEach(row => {
-        if (row.Grupa.toLowerCase() === grupa.toLowerCase()) {
-          row.tile.onclick = () => selectOption('material', row.Nazwa, row.price, row.tile);
-          materialGrid.appendChild(row.tile);
-        }
-      });
-
-         
-    }
-  
-
-    loadSheetData();
-  </script>
 </body>
 </html>
