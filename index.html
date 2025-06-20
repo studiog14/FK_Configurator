@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title></title>
   <style>
-    /* bez zmian, ale dodajemy tooltip */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -15,7 +14,7 @@
     }
 
     #viewer {
-      flex: 5;
+      flex: 5.5;
       background-color: #e0e0e0;
       display: flex;
       align-items: center;
@@ -32,17 +31,32 @@
       flex: 2;
       background-color: #fff;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       border-left: 1px solid #ccc;
+      box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #ui-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       padding: 10px;
       box-sizing: border-box;
       overflow-y: auto;
     }
 
-    #top-buttons {
+    #right-icons {
+      width: 80px;
+      background-color: #fff;
+      border-left: 2px solid black;
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 5px;
+      box-sizing: border-box;
     }
 
     .icon-button {
@@ -188,43 +202,45 @@
   </div>
 
   <div id="ui-panel">
-    <div id="top-buttons">
+    <div id="ui-content">
+      <div id="panel-chair" class="panel active">
+        <p>Wybierz model krzesła:</p>
+        <div id="chair-grid" class="chair-grid"></div>
+      </div>
+
+      <div id="panel-material" class="panel">
+        <p>Wybierz część krzesła:</p>
+        <div id="material-part-selector">
+          <div class="part-button active" data-part="legs" onclick="selectPart(this)">
+            <img src="icons/m_legs_icon.png" alt="Nogi"><br>Nogi
+          </div>
+          <div class="part-button" data-part="seat" onclick="selectPart(this)">
+            <img src="icons/m_seat_icon.png" alt="Siedzisko"><br>Siedzisko
+          </div>
+          <div class="part-button" data-part="back_outer" onclick="selectPart(this)">
+            <img src="icons/m_backseat_out_icon.png" alt="Oparcie zewn."><br>Oparcie zewnętrzne
+          </div>
+          <div class="part-button" data-part="back_inner" onclick="selectPart(this)">
+            <img src="icons/m_backseat_in_icon.png" alt="Oparcie wewn."><br>Oparcie
+          </div>
+        </div>
+        <p>Wybierz materiał:</p>
+        <div id="material-grid" class="chair-grid"></div>
+      </div>
+
+      <div class="summary">
+        <div id="summary">Suma: 0 zł</div>
+        <button class="cart-button">Dodaj do koszyka</button>
+      </div>
+    </div>
+
+    <div id="right-icons">
       <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
         <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
       </button>
       <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
         <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
       </button>
-    </div>
-
-    <div id="panel-chair" class="panel active">
-      <p>Wybierz model krzesła:</p>
-      <div id="chair-grid" class="chair-grid"></div>
-    </div>
-
-    <div id="panel-material" class="panel">
-      <p>Wybierz część krzesła:</p>
-      <div id="material-part-selector">
-        <div class="part-button active" data-part="legs" onclick="selectPart(this)">
-          <img src="icons/m_legs_icon.png" alt="Nogi"><br>Nogi
-        </div>
-        <div class="part-button" data-part="seat" onclick="selectPart(this)">
-          <img src="icons/m_seat_icon.png" alt="Siedzisko"><br>Siedzisko
-        </div>
-        <div class="part-button" data-part="back_outer" onclick="selectPart(this)">
-          <img src="icons/m_backseat_out_icon.png" alt="Oparcie zewn."><br>Oparcie zewnętrzne
-        </div>
-        <div class="part-button" data-part="back_inner" onclick="selectPart(this)">
-          <img src="icons/m_backseat_in_icon.png" alt="Oparcie wewn."><br>Oparcie
-        </div>
-      </div>
-      <p>Wybierz materiał:</p>
-      <div id="material-grid" class="chair-grid"></div>
-    </div>
-
-    <div class="summary">
-      <div id="summary">Suma: 0 zł</div>
-      <button class="cart-button">Dodaj do koszyka</button>
     </div>
   </div>
 
@@ -241,8 +257,9 @@
 
     function showPanel(panelId, btn) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.icon-button').forEach(b => b.classList.remove('selected'));
       document.getElementById(panelId).classList.add('active');
+
+      document.querySelectorAll('.icon-button').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
     }
 
