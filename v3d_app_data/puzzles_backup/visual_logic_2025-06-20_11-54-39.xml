@@ -1,9 +1,6 @@
 <xml xmlns="http://www.w3.org/1999/xhtml">
-  <tab name="Init" type="InitTab" active="false" scrollx="1646.5" scrolly="0" scale="0.9"></tab>
-  <tab name="New Tab" type="CommonTab" active="true" scrollx="284.4449493362854" scrolly="214.30019376416521" scale="0.5939794798318193">
-    <variables xmlns="https://developers.google.com/blockly/xml">
-      <variable id=".:^U`hEe(6pqtr5C0b]2">grupa</variable>
-    </variables>
+  <tab name="Init" type="InitTab" active="false" scrollx="20" scrolly="20" scale="0.9"></tab>
+  <tab name="New Tab" type="CommonTab" active="true" scrollx="26.938015747070267" scrolly="26.399999999999977" scale="0.9">
     <block xmlns="https://developers.google.com/blockly/xml" type="autoRotateCamera" id="x90Z+.TI6f=:CXcK_|l!" x="171" y="248">
       <field name="ON_OFF">ON</field>
       <value name="SPEED">
@@ -64,20 +61,6 @@
               </next>
             </block>
           </statement>
-        </block>
-      </next>
-    </block>
-    <block xmlns="https://developers.google.com/blockly/xml" type="callJSFunction" id="HwePz;t3=BQ:^%kj-h+4" x="205" y="571">
-      <mutation xmlns="http://www.w3.org/1999/xhtml" name="sendChairGroupToPage"></mutation>
-      <field name="NAME">sendChairGroupToPage</field>
-      <next>
-        <block type="text_append" id="9|;:~*G=/:E.1Va6*Gn4">
-          <field name="VAR" id=".:^U`hEe(6pqtr5C0b]2">grupa</field>
-          <value name="TEXT">
-            <block type="text" id="hIyAkZ)RcX:0(TjolAM`">
-              <field name="TEXT">kubełek</field>
-            </block>
-          </value>
         </block>
       </next>
     </block>

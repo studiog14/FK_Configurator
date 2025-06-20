@@ -58,6 +58,10 @@
       padding: 10px 5px;
       box-sizing: border-box;
     }
+    
+     #legs-button {
+    display: none;
+  }
 
     .icon-button {
       background-color: transparent;
@@ -207,6 +211,10 @@
         <p>Wybierz model krzesła:</p>
         <div id="chair-grid" class="chair-grid"></div>
       </div>
+      <div id="panel-legs" class="panel">
+  <p>Wybierz wariant nóg:</p>
+  <p style="color: #777;">(Tutaj pojawią się opcje nóg – jeszcze do uzupełnienia)</p>
+</div>
 
       <div id="panel-material" class="panel">
         <p>Wybierz część krzesła:</p>
@@ -235,16 +243,17 @@
     </div>
 
     <div id="right-icons">
-      <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
-        <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
-      </button>
-      <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
-        <img src="icons/legs_icon.png" alt="Wybierz krzesło" />
-      </button>
-      <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
-        <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
-      </button>
-    </div>
+  <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
+    <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
+  </button>
+  <button id="legs-button" class="icon-button" data-tooltip="Wybór nóg" onclick="showPanel('panel-legs', this)">
+    <img src="icons/legs_icon.png" alt="Wybierz nogi" />
+  </button>
+  <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
+    <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
+  </button>
+</div>
+
   </div>
 
   <script>
@@ -312,7 +321,21 @@
         const price = parseFloat(row.Cena);
 
         if (["Krzesło", "Kubełek", "Nogi"].includes(row.Typ)) {
-          tile.onclick = () => selectOption("chair", row.Nazwa, price, tile);
+          tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
+
+tile.onclick = () => {
+  selectOption("chair", row.Nazwa, price, tile);
+
+  // Sprawdzenie, czy grupa to "kubełek"
+  const grupa = row.Grupa.toLowerCase();
+  const legsButton = document.getElementById("legs-button");
+  if (grupa === "kubełek") {
+    legsButton.style.display = "inline-block";
+  } else {
+    legsButton.style.display = "none";
+  }
+};
+
           chairGrid.appendChild(tile);
         } else if (row.Typ === "Materiał") {
           materialsData.push({ ...row, price, tile });
@@ -334,7 +357,10 @@
           materialGrid.appendChild(row.tile);
         }
       });
+
+         
     }
+  
 
     loadSheetData();
   </script>
