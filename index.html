@@ -261,7 +261,7 @@
     const selected = { chair: null, material: null };
     const prices = { chair: 0, material: 0 };
     let materialsData = [];
-
+    let legsData = [];   // <-- tutaj dokładnie
     function updateSummary() {
       const total = prices.chair + prices.material;
       document.getElementById("summary").innerText = `Suma: ${total} zł`;
@@ -301,49 +301,82 @@
     }
 
     async function loadSheetData() {
-      const sheetId = "1vCs6YeHgKqlYwg8rvJOqVzNRnXeATJCBuK-zh3NNj78";
-      const sheetName = "Dane";
-      const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+  const sheetId = "1vCs6YeHgKqlYwg8rvJOqVzNRnXeATJCBuK-zh3NNj78";
+  const sheetName = "Dane";
+  const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
 
-      const response = await fetch(url);
-      const data = await response.json();
+  const response = await fetch(url);
+  const data = await response.json();
 
-      const chairGrid = document.getElementById("chair-grid");
+  const chairGrid = document.getElementById("chair-grid");
 
-      data.forEach(row => {
-        const tile = document.createElement("div");
-        tile.className = "chair-tile";
-        tile.innerHTML = `
-          <img src="${row.Obrazek}" alt="${row.Nazwa}" />
-          <div class="chair-name">${row.Nazwa}</div>
-          <div class="chair-price">Cena: ${row.Cena} zł</div>
-        `;
-        const price = parseFloat(row.Cena);
+  data.forEach(row => {
+    const price = parseFloat(row.Cena);
 
-        if (["Krzesło", "Kubełek", "Nogi"].includes(row.Typ)) {
-          tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
+    if (row.Typ === "Krzesło" || row.Typ === "Kubełek") {
+      const tile = document.createElement("div");
+      tile.className = "chair-tile";
+      tile.innerHTML = `
+        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+        <div class="chair-name">${row.Nazwa}</div>
+        <div class="chair-price">Cena: ${row.Cena} zł</div>
+      `;
+      tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
+      tile.onclick = () => {
+        selectOption("chair", row.Nazwa, price, tile);
 
-tile.onclick = () => {
-  selectOption("chair", row.Nazwa, price, tile);
-
-  // Sprawdzenie, czy grupa to "kubełek"
-  const grupa = row.Grupa.toLowerCase();
-  const legsButton = document.getElementById("legs-button");
-  if (grupa === "kubełek") {
-    legsButton.style.display = "inline-block";
-  } else {
-    legsButton.style.display = "none";
-  }
-};
-
-          chairGrid.appendChild(tile);
-        } else if (row.Typ === "Materiał") {
-          materialsData.push({ ...row, price, tile });
+        const grupa = row.Grupa.toLowerCase();
+        const legsButton = document.getElementById("legs-button");
+        if (grupa === "kubełek") {
+          legsButton.style.display = "inline-block";
+          showLegsOptions();
+          showPanel('panel-legs', legsButton);
+        } else {
+          legsButton.style.display = "none";
         }
-      });
+      };
+      chairGrid.appendChild(tile);
 
-      filterMaterialsByPart(selectedPart);
+    } else if (row.Typ === "Nogi") {
+      const tile = document.createElement("div");
+      tile.className = "chair-tile";
+      tile.innerHTML = `
+        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+        <div class="chair-name">${row.Nazwa}</div>
+        <div class="chair-price">Cena: ${row.Cena} zł</div>
+      `;
+      tile.onclick = () => selectOption('material', row.Nazwa, price, tile);
+      legsData.push(tile);
+
+    } else if (row.Typ === "Materiał") {
+      const tile = document.createElement("div");
+      tile.className = "chair-tile";
+      tile.innerHTML = `
+        <img src="${row.Obrazek}" alt="${row.Nazwa}" />
+        <div class="chair-name">${row.Nazwa}</div>
+        <div class="chair-price">Cena: ${row.Cena} zł</div>
+      `;
+      tile.onclick = () => selectOption('material', row.Nazwa, price, tile);
+      materialsData.push({ ...row, price, tile });
     }
+  });
+
+  filterMaterialsByPart(selectedPart);
+}
+
+    function showLegsOptions() {
+  const legsPanel = document.getElementById("panel-legs");
+  legsPanel.innerHTML = '<p>Wybierz wariant nóg:</p>'; // czyszczenie i nagłówek
+
+  const legsContainer = document.createElement("div");
+  legsContainer.className = "chair-grid";
+
+  legsData.forEach(tile => {
+    legsContainer.appendChild(tile);
+  });
+
+  legsPanel.appendChild(legsContainer);
+}
 
     function filterMaterialsByPart(part) {
       const materialGrid = document.getElementById("material-grid");
