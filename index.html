@@ -516,11 +516,47 @@
     legsPanel.appendChild(legsContainer);
   }
 
-  function filterMaterialsByPart(part) {
-    const materialGrid = document.getElementById("material-grid");
-    materialGrid.innerHTML = "";
+  
+function filterMaterialsByPart(part) {
+  const materialGrid = document.getElementById("material-grid");
+  materialGrid.innerHTML = "";
 
-    const grupa = part === "legs" ? "metal/drewno" : "tkanina";
+  if (part === "legs") {
+    // Podział na Drewno i Metal osobno
+    const drewnoMaterials = materialsData.filter(row => row.Grupa.toLowerCase() === "drewno");
+    const metalMaterials = materialsData.filter(row => row.Grupa.toLowerCase() === "metal");
+
+    function createSection(title, materials) {
+      const section = document.createElement("div");
+      section.className = "accordion-section";
+      section.setAttribute("data-collection", title);
+
+      const header = document.createElement("div");
+      header.className = "accordion-header";
+      header.textContent = title;
+      header.onclick = () => {
+        toggleCollection(title);
+      };
+
+      const content = document.createElement("div");
+      content.className = "accordion-content";
+      materials.forEach(mat => content.appendChild(mat.tile));
+
+      section.appendChild(header);
+      section.appendChild(content);
+      return section;
+    }
+
+    if (drewnoMaterials.length > 0) {
+      materialGrid.appendChild(createSection("Drewno", drewnoMaterials));
+    }
+    if (metalMaterials.length > 0) {
+      materialGrid.appendChild(createSection("Metal", metalMaterials));
+    }
+
+  } else {
+    // Dla innych części
+    const grupa = "tkanina"; // dla innych zawsze tkanina
 
     const kolekcjeMap = {};
 
@@ -555,42 +591,43 @@
       section.appendChild(content);
       materialGrid.appendChild(section);
 
-      // ustaw początkowy stan otwarcia
       if (openedCollection === kolekcja) {
         content.classList.add("open");
       }
     });
   }
+}
 
-  function toggleCollection(collectionName) {
-    const allSections = document.querySelectorAll('.accordion-section');
+function toggleCollection(collectionName) {
+  const allSections = document.querySelectorAll('.accordion-section');
 
-    if (openedCollection === collectionName) {
-      // Zamykamy kolekcję wszędzie
+  if (openedCollection === collectionName) {
+    // Zamykamy tę kolekcję
+    allSections.forEach(section => {
+      if (section.getAttribute('data-collection') === collectionName) {
+        section.querySelector('.accordion-content').classList.remove('open');
+      }
+    });
+    openedCollection = null;
+  } else {
+    // Zamykamy poprzednią otwartą kolekcję
+    if (openedCollection) {
       allSections.forEach(section => {
-        if (section.getAttribute('data-collection') === collectionName) {
+        if (section.getAttribute('data-collection') === openedCollection) {
           section.querySelector('.accordion-content').classList.remove('open');
         }
       });
-      openedCollection = null;
-    } else {
-      // Zamykamy poprzednią otwartą kolekcję wszędzie
-      if (openedCollection) {
-        allSections.forEach(section => {
-          if (section.getAttribute('data-collection') === openedCollection) {
-            section.querySelector('.accordion-content').classList.remove('open');
-          }
-        });
-      }
-      // Otwieramy nową kolekcję wszędzie
-      allSections.forEach(section => {
-        if (section.getAttribute('data-collection') === collectionName) {
-          section.querySelector('.accordion-content').classList.add('open');
-        }
-      });
-      openedCollection = collectionName;
     }
+    // Otwieramy nową kolekcję
+    allSections.forEach(section => {
+      if (section.getAttribute('data-collection') === collectionName) {
+        section.querySelector('.accordion-content').classList.add('open');
+      }
+    });
+    openedCollection = collectionName;
   }
+}
+
 
   loadSheetData();
 </script>
