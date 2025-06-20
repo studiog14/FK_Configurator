@@ -209,19 +209,30 @@
   }
 
   .part-icon {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 28px;
-    height: 28px;
-    opacity: 0.85;
-    pointer-events: none;
-  }
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 16px;
+  height: 16px;
+  z-index: 10;
+}
 
-  .part-icon img {
-    width: 100%;
-    height: 100%;
-  }
+.part-icon.offset-0 { right: 5px; }
+.part-icon.offset-1 { right: 25px; }
+.part-icon.offset-2 { right: 45px; }
+
+
+.part-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* Dodatkowe klasy dla przesunięć ikonek */
+.part-icon.offset-0 { left: 5px; }
+.part-icon.offset-1 { left: 30px; }
+.part-icon.offset-2 { left: 55px; }
+.part-icon.offset-3 { left: 80px; }
   
   </style>
 </head>
@@ -414,12 +425,24 @@
 
           tile.classList.add("selected-chair");
 
-          const icon = document.createElement("div");
-          icon.className = "part-icon";
-          icon.innerHTML = `<img src="icons/${iconNames[selectedPart] || (selectedPart + '.png')}" alt="${selectedPart}" />`;
+          // Usuń poprzednią ikonę przypisaną do tej części
+const prevTile = selectedMaterials[selectedPart]?.tile;
+if (prevTile) {
+  const existingIcon = prevTile.querySelector(`.part-icon[data-part="${selectedPart}"]`);
+  if (existingIcon) existingIcon.remove();
+}
 
+// Sprawdź ile ikon już jest na tym kafelku
+const existingIcons = tile.querySelectorAll(".part-icon");
+const offsetIndex = existingIcons.length;
 
-          tile.appendChild(icon);
+// Stwórz nową ikonę z przesunięciem
+const icon = document.createElement("div");
+icon.className = `part-icon offset-${offsetIndex}`;
+icon.dataset.part = selectedPart; // potrzebne do późniejszego usuwania
+icon.innerHTML = `<img src="icons/${iconNames[selectedPart] || (selectedPart + '.png')}" alt="${selectedPart}" />`;
+tile.appendChild(icon);
+
 
           selectedMaterials[selectedPart] = {
             name: row.Nazwa,
