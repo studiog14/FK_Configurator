@@ -6,67 +6,66 @@
   <title></title>
   <style>
     body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-#viewer {
-  flex: 1; /* zajmuje całą pozostałą przestrzeń */
-  background-color: #e0e0e0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 200px; /* opcjonalnie, aby nie znikł */
-  min-height: 200px;
-}
+    #viewer {
+      flex: 1;
+      background-color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 200px;
+      min-height: 200px;
+    }
 
-#viewer iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+    #viewer iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
-#ui-panel {
-  width: 510px; /* stała szerokość panelu UI */
-  flex: none; /* nie skaluj się */
-  background-color: #fff;
-  display: flex;
-  flex-direction: row;
-  border-left: 1px solid #ccc;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-  min-width: 510px; /* wymuszona minimalna szerokość */
-}
+    #ui-panel {
+      width: 510px;
+      flex: none;
+      background-color: #fff;
+      display: flex;
+      flex-direction: row;
+      border-left: 1px solid #ccc;
+      box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
+      min-width: 510px;
+    }
 
-/* poniżej pozostaw wszystko bez zmian */
-#ui-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
+    #ui-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
 
-#right-icons {
-  width: 80px;
-  background-color: #fff;
-  border-left: 2px solid black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 5px;
-  box-sizing: border-box;
-}
-    
-     #legs-button {
-    display: none;
-  }
+    #right-icons {
+      width: 80px;
+      background-color: #fff;
+      border-left: 2px solid black;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 5px;
+      box-sizing: border-box;
+    }
+
+    #legs-button {
+      display: none;
+    }
 
     .icon-button {
       background-color: transparent;
@@ -128,6 +127,7 @@
       transition: border 0.2s;
       border-radius: 6px;
       background-color: #f9f9f9;
+      position: relative;
     }
 
     .chair-tile.selected-chair {
@@ -204,36 +204,76 @@
       background-color: #e0e0e0;
     }
 
-    .chair-tile {
-    position: relative;
-  }
+    .part-icon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 28px;
+      height: 28px;
+      opacity: 0.85;
+      pointer-events: none;
+    }
 
-  .part-icon {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 16px;
-  height: 16px;
-  z-index: 10;
+    .part-icon img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .separator {
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #444;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
 }
 
-.part-icon.offset-0 { right: 5px; }
-.part-icon.offset-1 { right: 25px; }
-.part-icon.offset-2 { right: 45px; }
-
-
-.part-icon img {
-  width: 100%;
-  height: 100%;
-  border-radius: 3px;
+.accordion-section {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #ccc;
 }
 
-/* Dodatkowe klasy dla przesunięć ikonek */
-.part-icon.offset-0 { left: 5px; }
-.part-icon.offset-1 { left: 30px; }
-.part-icon.offset-2 { left: 55px; }
-.part-icon.offset-3 { left: 80px; }
+.accordion-header {
+  font-weight: bold;
+  font-size: 16px;
+  background-color: #f1f1f1;
+  padding: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s;
+}
+
+.accordion-header:hover {
+  background-color: #e0e0e0;
+}
+
+.accordion-content {
+  display: flex; /* zmiana z flex na grid */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+
+  padding-left: 8px;
+  padding-right: 8px;
+
+  padding-top: 0;
+  padding-bottom: 0;
   
+  box-sizing: border-box;
+}
+
+.accordion-content.open {
+  max-height: 800px; /* dopasuj do potrzeb */
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
+
   </style>
 </head>
 <body>
@@ -248,9 +288,9 @@
         <div id="chair-grid" class="chair-grid"></div>
       </div>
       <div id="panel-legs" class="panel">
-  <p>Wybierz wariant nóg:</p>
-  <p style="color: #777;">(Tutaj pojawią się opcje nóg – jeszcze do uzupełnienia)</p>
-</div>
+        <p>Wybierz wariant nóg:</p>
+        <p style="color: #777;">(Tutaj pojawią się opcje nóg – jeszcze do uzupełnienia)</p>
+      </div>
 
       <div id="panel-material" class="panel">
         <p>Wybierz część krzesła:</p>
@@ -279,17 +319,16 @@
     </div>
 
     <div id="right-icons">
-  <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
-    <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
-  </button>
-  <button id="legs-button" class="icon-button" data-tooltip="Wybór nóg" onclick="showPanel('panel-legs', this)">
-    <img src="icons/legs_icon.png" alt="Wybierz nogi" />
-  </button>
-  <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
-    <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
-  </button>
-</div>
-
+      <button class="icon-button selected" data-tooltip="Wybór krzesła" onclick="showPanel('panel-chair', this)">
+        <img src="icons/chair_icon.png" alt="Wybierz krzesło" />
+      </button>
+      <button id="legs-button" class="icon-button" data-tooltip="Wybór nóg" onclick="showPanel('panel-legs', this)">
+        <img src="icons/legs_icon.png" alt="Wybierz nogi" />
+      </button>
+      <button class="icon-button" data-tooltip="Wybór materiału" onclick="showPanel('panel-material', this)">
+        <img src="icons/fabric_icon.png" alt="Wybierz materiał" />
+      </button>
+    </div>
   </div>
 
   <script>
@@ -299,13 +338,10 @@
   const selectedMaterials = {};
   let materialsData = [];
   let legsData = [];
-  const iconNames = {
-  legs: "m_legs_icon.png",
-  seat: "m_seat_icon.png",
-  back_inner: "m_backseat_in_icon.png",
-  back_outer: "m_backseat_out_icon.png",
-  // itd.
-};
+  let selectedChairGroup = null;
+
+  // GLOBALNY STAN OTWARTEJ KOLEKCJI
+  let openedCollection = null;
 
   function updateSummary() {
     let total = (prices.chair || 0) + (prices.legs || 0);
@@ -340,11 +376,31 @@
       el.classList.remove('selected-chair');
       selected[type] = null;
       prices[type] = 0;
+
+      if (type === "chair") {
+        selectedChairGroup = null;
+        document.getElementById("legs-button").style.display = "none";
+        selected.legsTile = null;
+        prices.legs = 0;
+      }
     } else {
       grid.querySelectorAll('.chair-tile').forEach(tile => tile.classList.remove('selected-chair'));
       el.classList.add('selected-chair');
       selected[type] = name;
       prices[type] = price;
+
+      if (type === "chair") {
+        selectedChairGroup = el.getAttribute("data-grupa");
+
+        if (selectedChairGroup === "kubełek") {
+          document.getElementById("legs-button").style.display = "inline-block";
+          showLegsOptions();
+        } else {
+          document.getElementById("legs-button").style.display = "none";
+          selected.legsTile = null;
+          prices.legs = 0;
+        }
+      }
     }
 
     updateSummary();
@@ -374,18 +430,8 @@
         tile.setAttribute("data-grupa", row.Grupa.toLowerCase());
         tile.onclick = () => {
           selectOption("chair", row.Nazwa, price, tile);
-
-          const grupa = row.Grupa.toLowerCase();
-          const legsButton = document.getElementById("legs-button");
-          if (grupa === "kubełek") {
-            legsButton.style.display = "inline-block";
-            showLegsOptions();
-          } else {
-            legsButton.style.display = "none";
-          }
         };
         chairGrid.appendChild(tile);
-
       } else if (row.Typ === "Nogi") {
         const tile = document.createElement("div");
         tile.className = "chair-tile";
@@ -396,7 +442,6 @@
         `;
         tile.setAttribute("data-price", price);
         legsData.push(tile);
-
       } else if (row.Typ === "Materiał") {
         const tile = document.createElement("div");
         tile.className = "chair-tile";
@@ -410,8 +455,6 @@
 
           if (previouslySelected === tile) {
             tile.classList.remove("selected-chair");
-            const icon = tile.querySelector(".part-icon");
-            if (icon) icon.remove();
             delete selectedMaterials[selectedPart];
             updateSummary();
             return;
@@ -419,37 +462,14 @@
 
           if (previouslySelected) {
             previouslySelected.classList.remove("selected-chair");
-            const oldIcon = previouslySelected.querySelector(".part-icon");
-            if (oldIcon) oldIcon.remove();
           }
 
           tile.classList.add("selected-chair");
-
-          // Usuń poprzednią ikonę przypisaną do tej części
-const prevTile = selectedMaterials[selectedPart]?.tile;
-if (prevTile) {
-  const existingIcon = prevTile.querySelector(`.part-icon[data-part="${selectedPart}"]`);
-  if (existingIcon) existingIcon.remove();
-}
-
-// Sprawdź ile ikon już jest na tym kafelku
-const existingIcons = tile.querySelectorAll(".part-icon");
-const offsetIndex = existingIcons.length;
-
-// Stwórz nową ikonę z przesunięciem
-const icon = document.createElement("div");
-icon.className = `part-icon offset-${offsetIndex}`;
-icon.dataset.part = selectedPart; // potrzebne do późniejszego usuwania
-icon.innerHTML = `<img src="icons/${iconNames[selectedPart] || (selectedPart + '.png')}" alt="${selectedPart}" />`;
-tile.appendChild(icon);
-
-
           selectedMaterials[selectedPart] = {
             name: row.Nazwa,
             price: price,
             tile: tile
           };
-
           updateSummary();
         };
 
@@ -486,7 +506,6 @@ tile.appendChild(icon);
         tile.classList.add("selected-chair");
         selected.legsTile = tile;
         prices.legs = parseFloat(tile.getAttribute("data-price")) || 0;
-
         updateSummary();
       };
 
@@ -503,16 +522,78 @@ tile.appendChild(icon);
 
     const grupa = part === "legs" ? "metal/drewno" : "tkanina";
 
+    const kolekcjeMap = {};
+
     materialsData.forEach(row => {
-      if (row.Grupa.toLowerCase() === grupa.toLowerCase()) {
-        materialGrid.appendChild(row.tile);
+      if (row.Grupa.toLowerCase() === grupa) {
+        const kolekcja = row.Kolekcja || "Inne";
+        if (!kolekcjeMap[kolekcja]) {
+          kolekcjeMap[kolekcja] = [];
+        }
+        kolekcjeMap[kolekcja].push(row.tile);
+      }
+    });
+
+    Object.keys(kolekcjeMap).forEach(kolekcja => {
+      const section = document.createElement("div");
+      section.className = "accordion-section";
+      section.setAttribute("data-collection", kolekcja);
+
+      const header = document.createElement("div");
+      header.className = "accordion-header";
+      header.textContent = kolekcja;
+
+      const content = document.createElement("div");
+      content.className = "accordion-content";
+      kolekcjeMap[kolekcja].forEach(tile => content.appendChild(tile));
+
+      header.onclick = () => {
+        toggleCollection(kolekcja);
+      };
+
+      section.appendChild(header);
+      section.appendChild(content);
+      materialGrid.appendChild(section);
+
+      // ustaw początkowy stan otwarcia
+      if (openedCollection === kolekcja) {
+        content.classList.add("open");
       }
     });
   }
 
+  function toggleCollection(collectionName) {
+    const allSections = document.querySelectorAll('.accordion-section');
+
+    if (openedCollection === collectionName) {
+      // Zamykamy kolekcję wszędzie
+      allSections.forEach(section => {
+        if (section.getAttribute('data-collection') === collectionName) {
+          section.querySelector('.accordion-content').classList.remove('open');
+        }
+      });
+      openedCollection = null;
+    } else {
+      // Zamykamy poprzednią otwartą kolekcję wszędzie
+      if (openedCollection) {
+        allSections.forEach(section => {
+          if (section.getAttribute('data-collection') === openedCollection) {
+            section.querySelector('.accordion-content').classList.remove('open');
+          }
+        });
+      }
+      // Otwieramy nową kolekcję wszędzie
+      allSections.forEach(section => {
+        if (section.getAttribute('data-collection') === collectionName) {
+          section.querySelector('.accordion-content').classList.add('open');
+        }
+      });
+      openedCollection = collectionName;
+    }
+  }
+
   loadSheetData();
 </script>
-
 
 </body>
 </html>
