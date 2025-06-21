@@ -219,7 +219,7 @@
       height: 100%;
     }
 
-    .separator {
+   .separator {
   font-weight: bold;
   font-size: 16px;
   margin-top: 20px;
@@ -229,9 +229,17 @@
   padding-bottom: 4px;
 }
 
+#material-grid {
+  display: flex;
+  flex-direction: column; /* kolekcje pod sobą */
+  gap: 10px; /* odstęp między kolekcjami */
+}
+
 .accordion-section {
+  flex: 1 1 45%;
+  box-sizing: border-box;
   margin-bottom: 12px;
-  border-bottom: 1px solid #ccc;
+  /* border-bottom: 1px solid #ccc; */ /* usunięty */
 }
 
 .accordion-header {
@@ -249,28 +257,48 @@
 }
 
 .accordion-content {
-  display: flex; /* zmiana z flex na grid */
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.4s ease;
-
-  padding-left: 8px;
-  padding-right: 8px;
-
-  padding-top: 0;
-  padding-bottom: 0;
-  
-  box-sizing: border-box;
+  padding: 0;
+  border: none;
+  transition: max-height 0.3s ease, padding 0.3s ease, border 0.3s ease;
 }
 
 .accordion-content.open {
-  max-height: 800px; /* dopasuj do potrzeb */
+  max-height: 800px;
   padding-top: 8px;
   padding-bottom: 8px;
+  border-bottom: 1px solid #ccc;
 }
+
+#legs-materials-container {
+  display: flex;
+  justify-content: space-between; /* Drewno i Metal po lewej i prawej */
+  gap: 20px; /* odstęp między nimi */
+  margin-bottom: 20px; /* odstęp od materiałów tkanin */
+}
+
+/* Ustaw szerokość sekcji tak, by się ładnie mieściły */
+#legs-materials-container .accordion-section {
+  flex: 1; /* zajmują równą przestrzeń */
+  min-width: 0; /* zapobiega rozszerzaniu się ponad kontener */
+}
+
+/* Materiały tkanin domyślnie – pod sobą */
+#material-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Gdy pokazujemy materiały nóg – kolekcje obok siebie */
+#material-grid.legs-mode {
+  flex-direction: row;
+}
+
 
 
 
@@ -345,11 +373,9 @@
 
   function updateSummary() {
     let total = (prices.chair || 0) + (prices.legs || 0);
-
     for (const part in selectedMaterials) {
       total += selectedMaterials[part]?.price || 0;
     }
-
     document.getElementById("summary").innerText = `Suma: ${total} zł`;
   }
 
@@ -410,10 +436,8 @@
     const sheetId = "1vCs6YeHgKqlYwg8rvJOqVzNRnXeATJCBuK-zh3NNj78";
     const sheetName = "Dane";
     const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
-
     const response = await fetch(url);
     const data = await response.json();
-
     const chairGrid = document.getElementById("chair-grid");
 
     data.forEach(row => {
@@ -452,18 +476,15 @@
         `;
         tile.onclick = () => {
           const previouslySelected = selectedMaterials[selectedPart]?.tile;
-
           if (previouslySelected === tile) {
             tile.classList.remove("selected-chair");
             delete selectedMaterials[selectedPart];
             updateSummary();
             return;
           }
-
           if (previouslySelected) {
             previouslySelected.classList.remove("selected-chair");
           }
-
           tile.classList.add("selected-chair");
           selectedMaterials[selectedPart] = {
             name: row.Nazwa,
@@ -473,7 +494,7 @@
           updateSummary();
         };
 
-        materialsData.push({ ...row, price, tile, Grupa: row.Grupa });
+        materialsData.push({ ...row, price, tile, Grupa: row.Grupa, Kolekcja: row.Kolekcja });
       }
     });
 
@@ -483,14 +504,12 @@
   function showLegsOptions() {
     const legsPanel = document.getElementById("panel-legs");
     legsPanel.innerHTML = '<p>Wybierz wariant nóg:</p>';
-
     const legsContainer = document.createElement("div");
     legsContainer.className = "chair-grid";
 
     legsData.forEach(tile => {
       tile.onclick = () => {
         const previouslySelected = selected.legsTile;
-
         if (previouslySelected === tile) {
           tile.classList.remove("selected-chair");
           selected.legsTile = null;
@@ -498,17 +517,14 @@
           updateSummary();
           return;
         }
-
         if (previouslySelected) {
           previouslySelected.classList.remove("selected-chair");
         }
-
         tile.classList.add("selected-chair");
         selected.legsTile = tile;
         prices.legs = parseFloat(tile.getAttribute("data-price")) || 0;
         updateSummary();
       };
-
       tile.classList.remove("selected-chair");
       legsContainer.appendChild(tile);
     });
@@ -516,121 +532,114 @@
     legsPanel.appendChild(legsContainer);
   }
 
-  
-function filterMaterialsByPart(part) {
-  const materialGrid = document.getElementById("material-grid");
-  materialGrid.innerHTML = "";
+  function filterMaterialsByPart(part) {
+    const materialGrid = document.getElementById("material-grid");
+    materialGrid.innerHTML = "";
 
-  if (part === "legs") {
-    // Podział na Drewno i Metal osobno
-    const drewnoMaterials = materialsData.filter(row => row.Grupa.toLowerCase() === "drewno");
-    const metalMaterials = materialsData.filter(row => row.Grupa.toLowerCase() === "metal");
+    if (part === "legs") {
+      const drewnoMaterials = materialsData.filter(row => row.Grupa?.toLowerCase() === "drewno");
+      const metalMaterials = materialsData.filter(row => row.Grupa?.toLowerCase() === "metal");
 
-    function createSection(title, materials) {
-      const section = document.createElement("div");
-      section.className = "accordion-section";
-      section.setAttribute("data-collection", title);
+      function createSection(title, materials) {
+        const section = document.createElement("div");
+        section.className = "accordion-section";
+        section.setAttribute("data-collection", title);
 
-      const header = document.createElement("div");
-      header.className = "accordion-header";
-      header.textContent = title;
-      header.onclick = () => {
-        toggleCollection(title);
-      };
+        const header = document.createElement("div");
+        header.className = "accordion-header";
+        header.textContent = title;
+        header.onclick = () => {
+          toggleCollection(title);
+        };
 
-      const content = document.createElement("div");
-      content.className = "accordion-content";
-      materials.forEach(mat => content.appendChild(mat.tile));
+        const content = document.createElement("div");
+        content.className = "accordion-content";
+        materials.forEach(mat => content.appendChild(mat.tile));
 
-      section.appendChild(header);
-      section.appendChild(content);
-      return section;
-    }
-
-    if (drewnoMaterials.length > 0) {
-      materialGrid.appendChild(createSection("Drewno", drewnoMaterials));
-    }
-    if (metalMaterials.length > 0) {
-      materialGrid.appendChild(createSection("Metal", metalMaterials));
-    }
-
-  } else {
-    // Dla innych części
-    const grupa = "tkanina"; // dla innych zawsze tkanina
-
-    const kolekcjeMap = {};
-
-    materialsData.forEach(row => {
-      if (row.Grupa.toLowerCase() === grupa) {
-        const kolekcja = row.Kolekcja || "Inne";
-        if (!kolekcjeMap[kolekcja]) {
-          kolekcjeMap[kolekcja] = [];
+        if (openedCollection === title) {
+          content.classList.add("open");
         }
-        kolekcjeMap[kolekcja].push(row.tile);
+
+        section.appendChild(header);
+        section.appendChild(content);
+        return section;
       }
-    });
 
-    Object.keys(kolekcjeMap).forEach(kolekcja => {
-      const section = document.createElement("div");
-      section.className = "accordion-section";
-      section.setAttribute("data-collection", kolekcja);
-
-      const header = document.createElement("div");
-      header.className = "accordion-header";
-      header.textContent = kolekcja;
-
-      const content = document.createElement("div");
-      content.className = "accordion-content";
-      kolekcjeMap[kolekcja].forEach(tile => content.appendChild(tile));
-
-      header.onclick = () => {
-        toggleCollection(kolekcja);
-      };
-
-      section.appendChild(header);
-      section.appendChild(content);
-      materialGrid.appendChild(section);
-
-      if (openedCollection === kolekcja) {
-        content.classList.add("open");
+      if (drewnoMaterials.length > 0) {
+        materialGrid.appendChild(createSection("Drewno", drewnoMaterials));
       }
-    });
+      if (metalMaterials.length > 0) {
+        materialGrid.appendChild(createSection("Metal", metalMaterials));
+      }
+
+    } else {
+      const grupa = "tkanina";
+      const kolekcjeMap = {};
+
+      materialsData.forEach(row => {
+        if (row.Grupa?.toLowerCase() === grupa) {
+          const kolekcja = row.Kolekcja || "Inne";
+          if (!kolekcjeMap[kolekcja]) {
+            kolekcjeMap[kolekcja] = [];
+          }
+          kolekcjeMap[kolekcja].push(row.tile);
+        }
+      });
+
+      Object.keys(kolekcjeMap).forEach(kolekcja => {
+        const section = document.createElement("div");
+        section.className = "accordion-section";
+        section.setAttribute("data-collection", kolekcja);
+
+        const header = document.createElement("div");
+        header.className = "accordion-header";
+        header.textContent = kolekcja;
+        header.onclick = () => {
+          toggleCollection(kolekcja);
+        };
+
+        const content = document.createElement("div");
+        content.className = "accordion-content";
+        kolekcjeMap[kolekcja].forEach(tile => content.appendChild(tile));
+
+        if (openedCollection === kolekcja) {
+          content.classList.add("open");
+        }
+
+        section.appendChild(header);
+        section.appendChild(content);
+        materialGrid.appendChild(section);
+      });
+    }
   }
-}
 
-function toggleCollection(collectionName) {
-  const allSections = document.querySelectorAll('.accordion-section');
-
-  if (openedCollection === collectionName) {
-    // Zamykamy tę kolekcję
-    allSections.forEach(section => {
-      if (section.getAttribute('data-collection') === collectionName) {
-        section.querySelector('.accordion-content').classList.remove('open');
-      }
-    });
-    openedCollection = null;
-  } else {
-    // Zamykamy poprzednią otwartą kolekcję
-    if (openedCollection) {
+  function toggleCollection(collectionName) {
+    const allSections = document.querySelectorAll('.accordion-section');
+    if (openedCollection === collectionName) {
       allSections.forEach(section => {
-        if (section.getAttribute('data-collection') === openedCollection) {
+        if (section.getAttribute('data-collection') === collectionName) {
           section.querySelector('.accordion-content').classList.remove('open');
         }
       });
+      openedCollection = null;
+    } else {
+      allSections.forEach(section => {
+        section.querySelector('.accordion-content').classList.remove('open');
+      });
+      allSections.forEach(section => {
+        if (section.getAttribute('data-collection') === collectionName) {
+          section.querySelector('.accordion-content').classList.add('open');
+        }
+      });
+      openedCollection = collectionName;
     }
-    // Otwieramy nową kolekcję
-    allSections.forEach(section => {
-      if (section.getAttribute('data-collection') === collectionName) {
-        section.querySelector('.accordion-content').classList.add('open');
-      }
-    });
-    openedCollection = collectionName;
   }
-}
-
 
   loadSheetData();
 </script>
+
+
+
 
 </body>
 </html>
