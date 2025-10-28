@@ -1,0 +1,7 @@
+firebase.json
+**/.*        # ukryte pliki (np. .git, .vscode)
+**/node_modules/**
+**/__pycache__/**
+**/*.ps1
+**/*.bat
+**/*.zip
